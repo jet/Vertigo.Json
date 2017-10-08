@@ -1,5 +1,6 @@
 ﻿namespace Vertigo.Json
 
+/// [omit]
 module JsonConversions =
     open System
     open Vertigo.FSharp.Data

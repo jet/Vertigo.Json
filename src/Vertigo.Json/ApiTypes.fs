@@ -3,10 +3,14 @@
 open System
 open System.Text
 
+/// Enum representations in JSON
 type EnumValue =
+    /// Represent Enum value with string
     | String = 0
+    /// Represent Enum value with number
     | Number = 1
 
+/// Attribute type for customizing serialization to/from JSON 
 type JsonProperty (propertyName: string) =
     inherit Attribute()
     member val public PropertyName: string = propertyName with get, set
@@ -22,14 +26,17 @@ type JsonProperty (propertyName: string) =
 with
     static member Default = JsonProperty()
 
-
+/// Represent location in [Trace]
 type Location =
 | Property of string
 | Item of int
 
+/// Represents place in JSON structure
 type Trace = Location list
 
+/// Operations on [Trace]
 module Tracing =
+    /// Converts [Trace] into string in JSON path format
     let traceToString (trace: Trace) =
         match trace.Length with
         | 0 -> "JSON root"
@@ -44,14 +51,17 @@ module Tracing =
             )
             value.ToString()
 
+/// Exception that is thrown on errors during deserialization
 type JsonDeserializationException(trace: Trace, msg: string) =
     inherit Exception(msg)
     member e.Trace = trace
 
+/// Serialization behaviours for Option members 
 type OptionBehaviour =
 | NullForNone
 | FieldMissing
 
+/// Represents configuration for JSON serializer
 type JsonConfig = {
     option: OptionBehaviour
 }
