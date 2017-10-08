@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -62,22 +62,6 @@
   </Target>
   -->
   <Import Project="..\..\.paket\paket.targets" />
-  <ItemGroup>
-    <Compile Include="Tests.fs" />
-    <None Include="paket.references" />
-    <Content Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-    <ProjectReference Include="..\..\src\Vertigo.Json\Vertigo.Json.fsproj">
-      <Name>Vertigo.Json</Name>
-      <Project>{b5172f55-4223-4ded-a3b1-a09097d04520}</Project>
-      <Private>True</Private>
-    </ProjectReference>
-  </ItemGroup>
   <Choose>
     <When Condition="$(TargetFrameworkIdentifier) == '.NETFramework' And ($(TargetFrameworkVersion) == 'v4.5' Or $(TargetFrameworkVersion) == 'v4.5.1' Or $(TargetFrameworkVersion) == 'v4.5.2' Or $(TargetFrameworkVersion) == 'v4.5.3' Or $(TargetFrameworkVersion) == 'v4.6' Or $(TargetFrameworkVersion) == 'v4.6.1' Or $(TargetFrameworkVersion) == 'v4.6.2' Or $(TargetFrameworkVersion) == 'v4.6.3' Or $(TargetFrameworkVersion) == 'v4.7' Or $(TargetFrameworkVersion) == 'v4.7.1')">
       <ItemGroup>
@@ -90,6 +74,36 @@
     </When>
   </Choose>
   <ItemGroup>
+    <None Include="paket.references" />
+    <Content Include="App.config" />
+    <Compile Include="Primitive.fs" />
+    <Compile Include="Record.fs" />
+    <Compile Include="Mutable.fs" />
+    <Compile Include="Option.fs" />
+    <Compile Include="NullSafety.fs" />
+    <Compile Include="Enum.fs" />
+    <Compile Include="Tuple.fs" />
+    <Compile Include="Union.fs" />
+    <Compile Include="Array.fs" />
+    <Compile Include="List.fs" />
+    <Compile Include="Map.fs" />
+    <Compile Include="Attributes.fs" />
+    <Compile Include="Raw.fs" />
+    <Compile Include="Default.fs" />
+    <Compile Include="Converters.fs" />
+    <Compile Include="Tracing.fs" />
+    <Compile Include="Config.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <ProjectReference Include="..\..\src\Vertigo.Json\Vertigo.Json.fsproj">
+      <Name>Vertigo.Json</Name>
+      <Project>{b5172f55-4223-4ded-a3b1-a09097d04520}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <Reference Include="nunit.framework">
       <HintPath>..\..\packages\test\NUnit\lib\nunit.framework.dll</HintPath>
       <Private>True</Private>
