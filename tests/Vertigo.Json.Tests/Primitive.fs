@@ -100,12 +100,12 @@ module Primitive =
         let actual = Json.deserialize<SimpleDateTime>(s)
         Assert.AreEqual(value, actual)
 
-    [<Test>]
-    let ``DateTime member serialization Newtonsoft format`` () =
-        let expected = """{"amember":"2017-05-28T22:51:52.1236713-04:00"}"""
-        let therec = Json.deserialize<SimpleDateTime>(expected)
-        let actual = Json.serializeU(therec)
-        Assert.AreEqual(expected, actual)
+//    [<Test>]
+//    let ``DateTime member serialization Newtonsoft format`` () =
+//        let expected = """{"amember":"2017-05-28T22:51:52.1236713-04:00"}"""
+//        let therec = Json.deserialize<SimpleDateTime>(expected)
+//        let actual = Json.serializeU(therec)
+//        Assert.AreEqual(expected, actual)
 
     [<Test>]
     let ``DateTimeOffset member serialization`` () =
