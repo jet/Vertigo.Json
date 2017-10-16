@@ -5,8 +5,8 @@ open System.Reflection
 [<assembly: AssemblyTitleAttribute("Vertigo.Json")>]
 [<assembly: AssemblyProductAttribute("Vertigo.Json")>]
 [<assembly: AssemblyDescriptionAttribute("F# JSON (de)serialization library")>]
-[<assembly: AssemblyVersionAttribute("1.0.1")>]
-[<assembly: AssemblyFileVersionAttribute("1.0.1")>]
+[<assembly: AssemblyVersionAttribute("0.1.60")>]
+[<assembly: AssemblyFileVersionAttribute("0.1.60")>]
 [<assembly: AssemblyConfigurationAttribute("Release")>]
 do ()
 
@@ -14,6 +14,6 @@ module internal AssemblyVersionInformation =
     let [<Literal>] AssemblyTitle = "Vertigo.Json"
     let [<Literal>] AssemblyProduct = "Vertigo.Json"
     let [<Literal>] AssemblyDescription = "F# JSON (de)serialization library"
-    let [<Literal>] AssemblyVersion = "1.0.1"
-    let [<Literal>] AssemblyFileVersion = "1.0.1"
+    let [<Literal>] AssemblyVersion = "0.1.60"
+    let [<Literal>] AssemblyFileVersion = "0.1.60"
     let [<Literal>] AssemblyConfiguration = "Release"

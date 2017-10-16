@@ -18,7 +18,7 @@ open Vertigo.FSharp.Data.Runtime
 
 /// Specifies the formatting behaviour of JSON values
 [<RequireQualifiedAccess>]
-type JsonSaveOptions =
+type internal JsonSaveOptions =
   /// Format (indent) the JsonValue
   | None = 0
   /// Print the JsonValue in one line in a compact way
@@ -29,7 +29,7 @@ type JsonSaveOptions =
 /// smaller numbers are represented as decimals to avoid precision loss.
 [<RequireQualifiedAccess>]
 [<StructuredFormatDisplay("{_Print}")>]
-type JsonValue =
+type internal JsonValue =
   | String of string
   | Number of decimal
   | Float of float
@@ -38,7 +38,6 @@ type JsonValue =
   | Boolean of bool
   | Null  
 
-  /// [omit]
   [<EditorBrowsableAttribute(EditorBrowsableState.Never)>]
   [<CompilerMessageAttribute("This method is intended for use in generated code only.", 10001, IsHidden=true, IsError=false)>]
   member x._Print = x.ToString()

@@ -68,6 +68,8 @@ let gitRaw = environVarOrDefault "gitRaw" "https://raw.githubusercontent.com/jet
 // Read additional information from the release notes document
 let release = LoadReleaseNotes "RELEASE_NOTES.md"
 
+printf "Release: %A" release
+
 // Helper active pattern for project types
 let (|Fsproj|Csproj|Vbproj|Shproj|) (projFileName:string) =
     match projFileName with

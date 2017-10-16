@@ -36,7 +36,7 @@ module private Helpers =
 // --------------------------------------------------------------------------------------
 
 /// Conversions from string to string/int/int64/decimal/float/boolean/datetime/guid options
-type TextConversions =
+type internal TextConversions =
 
   static member DefaultMissingValues = [|"NaN"; "NA"; "#N/A"; ":"; "-"|]
 

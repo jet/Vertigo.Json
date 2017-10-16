@@ -1,7 +1,6 @@
 ﻿namespace Vertigo.Json
 
-/// [omit]
-module Reflection =
+module internal Reflection =
     open System
     open System.Globalization
     open System.Collections
@@ -113,8 +112,7 @@ module Reflection =
                 let theMap = cons.Invoke([|thelist|])
                 theMap
 
-/// [omit]
-module Internals =
+module internal Internals =
     open System
     open System.Text
     open System.Globalization
