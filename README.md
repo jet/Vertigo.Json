@@ -26,4 +26,4 @@ let data = Json.deserialize<YourType> json
 
 ## Maintainer(s)
 
-- [@vsapronov](https://github.com/vsapronov)
+- [@tombert](https://github.com/tombert)
