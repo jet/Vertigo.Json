@@ -2,8 +2,6 @@
 
 **Vertigo.Json** is F# JSON serialization library based on Reflection.
 
-See [the home page](http://jet.github.io/Vertigo.Json) for details.
-
 Here's example of Vertigo.Json usage:
 
 ```fsharp
