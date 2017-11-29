@@ -1,56 +1,60 @@
 
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26124.0
-MinimumVisualStudioVersion = 15.0.26124.0
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{40F19F16-4818-433F-AA5E-6D033DF2A824}"
+# Visual Studio 2012
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{63297B98-5CED-492C-A5B7-A5B4F73CF142}"
+	ProjectSection(SolutionItems) = preProject
+		paket.dependencies = paket.dependencies
+		paket.lock = paket.lock
+	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Vertigo.Json", "src\Vertigo.Json\Vertigo.Json.fsproj", "{FEE47D6B-F36C-41D4-9890-7527A71F64E0}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{A6A6AF7D-D6E3-442D-9B1E-58CC91879BE1}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{CE6157C0-948F-4822-8993-56B2C519EFFC}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Vertigo.Json", "src\Vertigo.Json\Vertigo.Json.fsproj", "{B5172F55-4223-4DED-A3B1-A09097D04520}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Vertigo.Json.Tests", "tests\Vertigo.Json.Tests\Vertigo.Json.Tests.fsproj", "{E7DF0C3C-824B-4EEC-95D4-F03580AB6535}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "project", "project", "{BF60BC93-E09B-4E5F-9D85-95A519479D54}"
+	ProjectSection(SolutionItems) = preProject
+		build.fsx = build.fsx
+		README.md = README.md
+		RELEASE_NOTES.md = RELEASE_NOTES.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{83F16175-43B1-4C90-A1EE-8E351C33435D}"
+	ProjectSection(SolutionItems) = preProject
+		docsrc\tools\generate.fsx = docsrc\tools\generate.fsx
+		docsrc\tools\templates\template.cshtml = docsrc\tools\templates\template.cshtml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "content", "content", "{8E6D5255-776D-4B61-85F9-73C37AA1FB9A}"
+	ProjectSection(SolutionItems) = preProject
+		docsrc\content\index.fsx = docsrc\content\index.fsx
+		docsrc\content\tutorial.fsx = docsrc\content\tutorial.fsx
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{ED8079DD-2B06-4030-9F0F-DC548F98E1C4}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Vertigo.Json.Tests", "tests\Vertigo.Json.Tests\Vertigo.Json.Tests.fsproj", "{BFB281E3-CE90-44F4-8F42-A488108286A3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
-		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
-		Release|x64 = Release|x64
-		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B5172F55-4223-4DED-A3B1-A09097D04520}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5172F55-4223-4DED-A3B1-A09097D04520}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5172F55-4223-4DED-A3B1-A09097D04520}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5172F55-4223-4DED-A3B1-A09097D04520}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFB281E3-CE90-44F4-8F42-A488108286A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFB281E3-CE90-44F4-8F42-A488108286A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFB281E3-CE90-44F4-8F42-A488108286A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFB281E3-CE90-44F4-8F42-A488108286A3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{FEE47D6B-F36C-41D4-9890-7527A71F64E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FEE47D6B-F36C-41D4-9890-7527A71F64E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FEE47D6B-F36C-41D4-9890-7527A71F64E0}.Debug|x64.ActiveCfg = Debug|x64
-		{FEE47D6B-F36C-41D4-9890-7527A71F64E0}.Debug|x64.Build.0 = Debug|x64
-		{FEE47D6B-F36C-41D4-9890-7527A71F64E0}.Debug|x86.ActiveCfg = Debug|x86
-		{FEE47D6B-F36C-41D4-9890-7527A71F64E0}.Debug|x86.Build.0 = Debug|x86
-		{FEE47D6B-F36C-41D4-9890-7527A71F64E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FEE47D6B-F36C-41D4-9890-7527A71F64E0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FEE47D6B-F36C-41D4-9890-7527A71F64E0}.Release|x64.ActiveCfg = Release|x64
-		{FEE47D6B-F36C-41D4-9890-7527A71F64E0}.Release|x64.Build.0 = Release|x64
-		{FEE47D6B-F36C-41D4-9890-7527A71F64E0}.Release|x86.ActiveCfg = Release|x86
-		{FEE47D6B-F36C-41D4-9890-7527A71F64E0}.Release|x86.Build.0 = Release|x86
-		{E7DF0C3C-824B-4EEC-95D4-F03580AB6535}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E7DF0C3C-824B-4EEC-95D4-F03580AB6535}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E7DF0C3C-824B-4EEC-95D4-F03580AB6535}.Debug|x64.ActiveCfg = Debug|x64
-		{E7DF0C3C-824B-4EEC-95D4-F03580AB6535}.Debug|x64.Build.0 = Debug|x64
-		{E7DF0C3C-824B-4EEC-95D4-F03580AB6535}.Debug|x86.ActiveCfg = Debug|x86
-		{E7DF0C3C-824B-4EEC-95D4-F03580AB6535}.Debug|x86.Build.0 = Debug|x86
-		{E7DF0C3C-824B-4EEC-95D4-F03580AB6535}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E7DF0C3C-824B-4EEC-95D4-F03580AB6535}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E7DF0C3C-824B-4EEC-95D4-F03580AB6535}.Release|x64.ActiveCfg = Release|x64
-		{E7DF0C3C-824B-4EEC-95D4-F03580AB6535}.Release|x64.Build.0 = Release|x64
-		{E7DF0C3C-824B-4EEC-95D4-F03580AB6535}.Release|x86.ActiveCfg = Release|x86
-		{E7DF0C3C-824B-4EEC-95D4-F03580AB6535}.Release|x86.Build.0 = Release|x86
-	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{FEE47D6B-F36C-41D4-9890-7527A71F64E0} = {40F19F16-4818-433F-AA5E-6D033DF2A824}
-		{E7DF0C3C-824B-4EEC-95D4-F03580AB6535} = {CE6157C0-948F-4822-8993-56B2C519EFFC}
+		{83F16175-43B1-4C90-A1EE-8E351C33435D} = {A6A6AF7D-D6E3-442D-9B1E-58CC91879BE1}
+		{8E6D5255-776D-4B61-85F9-73C37AA1FB9A} = {A6A6AF7D-D6E3-442D-9B1E-58CC91879BE1}
+		{BFB281E3-CE90-44F4-8F42-A488108286A3} = {ED8079DD-2B06-4030-9F0F-DC548F98E1C4}
 	EndGlobalSection
 EndGlobal
