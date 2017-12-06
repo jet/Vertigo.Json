@@ -18,6 +18,7 @@ module Union =
 
     type TheRecordWithFallback = {
         amember : TheUnionWithFallback
+        bmember : TheUnionWithFallback
     }
 
     [<Test>]
@@ -36,11 +37,15 @@ module Union =
 
     [<Test>]
     let ``Union deserialization fallback`` () =
-        let value = """{"amember": {"NonExistCase": "hello"}}"""
+        let value = """{"amember": {"NonExistCase": "hello"}, "bmember": {"NumCase": 22}}"""
         let deserialized = Json.deserialize<TheRecordWithFallback> value
         match deserialized.amember with
         | Fallback x -> Assert.AreEqual(x.ToString(), "hello")
         | _ -> failwith "Not correctly matching fallback"
+
+        match deserialized.bmember with
+        | NumCase x -> Assert.AreEqual(x, 22)
+        | _ -> failwith "Case not matching"
 
     [<Test>]
     let ``Union multifield serialization`` () =
