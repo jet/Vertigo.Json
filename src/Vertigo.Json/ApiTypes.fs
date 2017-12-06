@@ -22,6 +22,7 @@ type JsonProperty (propertyName: string) =
     member val public EnumValue: EnumValue = EnumValue.String with get, set
     member val public DefaultValue: obj = null with get, set
     member val public DateTimeFormat: string = null with get, set
+    member val public IsFallback : bool = false with get, set
     new () = JsonProperty(null)
 with
     static member Default = JsonProperty()

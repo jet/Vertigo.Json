@@ -505,11 +505,20 @@ module internal Internals =
                             field
 
                     let caseTrace = trace @ [Location.Property fieldName]
-                    let caseInfo = t |> getUnionCases |> Array.tryFind (fun c -> getCaseJsonFieldName c (getCaseJsonAttribute c) = fieldName)
+                    let unionCases = t |> getUnionCases 
+                    let caseInfo = unionCases |> Array.tryFind (fun c -> getCaseJsonFieldName c (getCaseJsonAttribute c) = fieldName)
                     let caseInfo =
                         match caseInfo with
                         | Some caseInfo -> caseInfo
-                        | None -> failDeserialization trace (sprintf "Unknown union case: %s" fieldName)
+                        | None -> 
+                            let possibleDefault = 
+                                unionCases |> Array.tryFind (fun c -> 
+                                    let at = getCaseJsonAttribute c
+                                    at.IsFallback
+                                )
+                            match possibleDefault with 
+                            | Some x -> x
+                            | None -> failDeserialization trace (sprintf "Unknown union case: %s" fieldName)
                     let attr = getCaseJsonAttribute caseInfo
                     let props: PropertyInfo array = caseInfo.GetFields()
                     let propsValues =
