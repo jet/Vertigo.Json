@@ -69,7 +69,7 @@ type JsonConfig = {
 with
     static member create(?option) =
         {
-            JsonConfig.option = defaultArg option OptionBehaviour.NullForNone
+            JsonConfig.option = defaultArg option OptionBehaviour.FieldMissing
         }
     static member defaultConfig = JsonConfig.create()
     
