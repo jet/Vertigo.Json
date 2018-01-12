@@ -30,7 +30,8 @@ module Option =
     [<Test>]
     let ``None serialized into null`` () =
         let value = { OptionInt.amember = None }
-        let actual = Json.serializeU value
+        let config = JsonConfig.create (OptionBehaviour.NullForNone)
+        let actual = Json.serializeUX config  value
         Assert.AreEqual("""{"amember":null}""", actual)
 
     [<Test>]

@@ -42,7 +42,8 @@ module List =
     let ``List of strings option none to string`` () =
         let expected = """{"amember":null}"""
         let value = { StringListOption.amember = None }
-        let json = Json.serializeU value
+        let config = JsonConfig.create (OptionBehaviour.NullForNone)
+        let json = Json.serializeUX config  value
         Assert.AreEqual(expected, json)
 
     [<Test>]

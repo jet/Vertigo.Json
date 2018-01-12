@@ -67,7 +67,8 @@ module Raw =
     [<Test>]
     let ``Raw option none serialization to string`` () =
         let value = { RecordWithRawOption.rawmember = None }
-        let json = Json.serializeU value
+        let config = JsonConfig.create (OptionBehaviour.NullForNone)
+        let json = Json.serializeUX config  value
         Assert.AreEqual("""{"rawmember":null}""", json)
 
     [<Test>]
