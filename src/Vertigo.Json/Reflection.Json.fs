@@ -263,7 +263,9 @@ module internal Internals =
                     |> Seq.map (fun o ->
                         let key = FSharpValue.KvpKey o :?> string
                         let value = FSharpValue.KvpValue o
-                        let jvalue = Serialize.Option config (value.GetType()) value JsonProperty.Default
+                        let finalType = if isNull value then (Some "").GetType() else value.GetType()
+                        
+                        let jvalue = Serialize.Option config finalType value JsonProperty.Default
                         match jvalue with
                         | Some jvalue -> (key, jvalue)
                         | None -> (key, JsonValue.Null)

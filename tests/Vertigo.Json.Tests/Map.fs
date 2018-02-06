@@ -9,6 +9,7 @@ module Map =
         amember: Map<string, string>
     }
 
+
     [<Test>]
     let ``Map string->string serialization`` () =
         let expected = """{"amember":{"thekey":"thevalue"}}"""
@@ -58,6 +59,12 @@ module Map =
     type SimpleRecord = {
         amember: string
     }
+    [<Test>]
+    let ``Map serialization of none`` () =
+        let data = [|"foo", Some "baz"; "bar", None|] |> Map.ofArray
+        let json = Json.serializeU data 
+        let expected = """{"bar":null,"foo":"baz"}"""
+        Assert.AreEqual(expected, json)
 
     [<Test>]
     let ``Map string->obj(record) serialization`` () =
