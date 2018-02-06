@@ -61,9 +61,9 @@ module Map =
     }
     [<Test>]
     let ``Map serialization of none`` () =
-        let data = [|"foo", Some "baz"; "bar", None|] |> Map.ofArray
+        let data = [|"foo", (Some "baz") :> obj; "bar", None :> obj; "bon", 10 :> obj; "things", ([|"ping", "pong"|] |> Map.ofArray) :> obj     |] |> Map.ofArray
         let json = Json.serializeU data 
-        let expected = """{"bar":null,"foo":"baz"}"""
+        let expected = """{"bar":null,"bon":10,"foo":"baz","things":{"ping":"pong"}}"""
         Assert.AreEqual(expected, json)
 
     [<Test>]
