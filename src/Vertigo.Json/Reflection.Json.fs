@@ -107,7 +107,10 @@ module internal Reflection =
                 let keyType = FSharpType.GetMapKeyType mapType
                 let valueType = FSharpType.GetMapValueType mapType
                 let tupleType = FSharpType.MakeTupleType [|keyType; valueType|]
-                let listItems = items |> List.map (fun item -> FSharpValue.MakeTuple([|fst item; snd item|], tupleType))
+                let listItems =
+                    items
+                    |> List.map (fun (first, second) ->
+                                 FSharpValue.MakeTuple([| first; second |], tupleType))
                 let thelist = FSharpValue.MakeList tupleType listItems
                 let theMap = cons.Invoke([|thelist|])
                 theMap
@@ -247,13 +250,16 @@ module internal Internals =
                 | None -> None
 
             static member Enumerable (config: JsonConfig) (objs: IEnumerable): JsonValue =
+                let serializeOption o = 
+                    Serialize.Option config (o.GetType()) o JsonProperty.Default
+                let checkNull jvalue = 
+                    match jvalue with
+                    | Some jvalue -> jvalue
+                    | None -> JsonValue.Null
+                let comp = serializeOption >> checkNull
                 let items =
                     objs.Cast<Object>()
-                    |> Seq.map (fun o -> Serialize.Option config (o.GetType()) o JsonProperty.Default)
-                    |> Seq.map (fun jvalue ->
-                        match jvalue with
-                        | Some jvalue -> jvalue
-                        | None -> JsonValue.Null)
+                    |> Seq.map (comp)
                     |> Array.ofSeq
                 JsonValue.Array items
 
@@ -263,9 +269,8 @@ module internal Internals =
                     |> Seq.map (fun o ->
                         let key = FSharpValue.KvpKey o :?> string
                         let value = FSharpValue.KvpValue o
-                        let finalType = if isNull value then (Some "").GetType() else value.GetType()
-                        
-                        let jvalue = Serialize.Option config finalType value JsonProperty.Default
+                        let jtype = if isNull value then (Some ()).GetType() else value.GetType()
+                        let jvalue = Serialize.Option config jtype value JsonProperty.Default
                         match jvalue with
                         | Some jvalue -> (key, jvalue)
                         | None -> (key, JsonValue.Null)
@@ -274,8 +279,10 @@ module internal Internals =
                 JsonValue.Record properties
 
             static member Record (config: JsonConfig) (t: Type) (o: obj): JsonValue =
-                let props: PropertyInfo array = getRecordFields(t)
-                let fields = props |> Array.map (Serialize.Property config o) |> Array.choose id
+                let props: PropertyInfo [] = getRecordFields(t)
+                let fields =
+                    props
+                    |> Array.choose (Serialize.Property config o)
                 JsonValue.Record fields
 
             static member Union (config: JsonConfig) (t: Type) (o: obj): JsonValue =
@@ -416,9 +423,7 @@ module internal Internals =
                 match value with
                 | JsonValue.Record fields ->
                     fields 
-                    |> Array.map (fun field ->
-                        let itemName = fst field
-                        let itemValue = snd field
+                    |> Array.map (fun (itemName, itemValue) ->
                         let itemType =
                             match itemType with
                             | t when t = typeof<obj> -> itemType
@@ -470,7 +475,7 @@ module internal Internals =
                         |> Array.map (fun prop ->
                             let attr = getFieldJsonAttribute prop
                             let name = getFieldJsonFieldName prop attr
-                            let field = fields |> Seq.tryFind (fun f -> fst f = name)
+                            let field = fields |> Seq.tryFind (fun (f, _) -> f = name)
                             let fieldValue = field |> Option.map snd
                             let propertyTrace = trace @ [Location.Property name]
                             Deserialize.Option config propertyTrace prop.PropertyType attr fieldValue
@@ -487,12 +492,12 @@ module internal Internals =
                         | caseKey, caseValue when caseKey <> null && caseValue <> null ->
                             if fields.Length <> 2 then
                                 failDeserialization trace (sprintf "Can't parse union from record with %i fields" fields.Length)
-                            let fieldName = fields |> Seq.tryFind (fun f -> fst f = caseKey)
+                            let fieldName = fields |> Seq.tryFind (fun (f, _) -> f = caseKey)
                             let fieldName =
                                 match fieldName with
                                 | Some fieldName -> fieldName
                                 | None -> failDeserialization trace (sprintf "Can't find union case for key: %s" caseKey)
-                            let fieldValue = fields |> Seq.tryFind (fun f -> fst f = caseValue)
+                            let fieldValue = fields |> Seq.tryFind (fun (f, _) -> f = caseValue)
                             let fieldValue =
                                 match fieldValue with
                                 | Some fieldValue -> fieldValue

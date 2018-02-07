@@ -36,7 +36,7 @@ module Json =
         match t with
         | t when isRecord t -> ()
         | _ -> failwith "Can not get json fields from any type other then record"
-        let props: PropertyInfo array = getRecordFields(t)
+        let props: PropertyInfo [] = getRecordFields(t)
         let fields = props |> Array.map jsonFieldName
         fields
 
