@@ -269,7 +269,7 @@ module internal Internals =
                     |> Seq.map (fun o ->
                         let key = 
                             try FSharpValue.KvpKey o :?> string 
-                            with | ex -> failwith "Issue casting JSON key to string. The JSON Specification currently only allows string-keys."
+                            with | ex -> failwith (sprintf "Issue casting JSON key to string. The JSON Specification currently only allows string-keys.\n %s" <| ex.ToString())
                         let value = FSharpValue.KvpValue o
                         let jtype = if isNull value then (Some ()).GetType() else value.GetType()
                         let jvalue = Serialize.Option config jtype value JsonProperty.Default
