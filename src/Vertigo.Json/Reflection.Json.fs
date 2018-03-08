@@ -267,7 +267,9 @@ module internal Internals =
                 let properties =
                     kvps.Cast<Object>()
                     |> Seq.map (fun o ->
-                        let key = FSharpValue.KvpKey o :?> string
+                        let key = 
+                            try FSharpValue.KvpKey o :?> string 
+                            with | ex -> failwith "Issue casting JSON key to string. The JSON Specification currently only allows string-keys."
                         let value = FSharpValue.KvpValue o
                         let jtype = if isNull value then (Some ()).GetType() else value.GetType()
                         let jvalue = Serialize.Option config jtype value JsonProperty.Default
