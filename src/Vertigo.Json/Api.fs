@@ -19,6 +19,7 @@ module Json =
         let json = serializeX config objekt
         Encoding.UTF8.GetBytes json
 
+
     let serializeUX (config: JsonConfig) (objekt: obj): string =
         let json = Internals.Serialize.Root config (objekt.GetType()) objekt
         json.ToString(JsonSaveOptions.DisableFormatting)
@@ -27,9 +28,23 @@ module Json =
         let value = JsonValue.Parse(json)
         (Internals.Deserialize.Root config typeof<'T> value) :?> 'T
 
-    let deserializeFromBytesX<'T> (config: JsonConfig) (data: byte array) =
+    let tryDeserializeX<'T> config json : Choice<'T, exn> =
+        try
+            Choice1Of2 <|  deserializeX<'T> config json
+        with
+        | ex -> 
+            Choice2Of2 ex
+
+    let deserializeFromBytesX<'T> (config: JsonConfig) (data: byte array) : 'T =
         let json = Encoding.UTF8.GetString data
         deserializeX<'T> config json
+
+    let tryDeserializeFromBytesX<'T> config data : Choice<'T, exn> = 
+        try 
+            Choice1Of2 <| deserializeFromBytesX config data
+        with
+        | ex ->
+            Choice2Of2 ex
 
     let jsonFieldsX<'T> (config: JsonConfig) =
         let t = typeof<'T>
@@ -44,7 +59,9 @@ module Json =
     let serializeToBytes (objekt: obj) = serializeToBytesX JsonConfig.defaultConfig objekt
     let serializeU (objekt: obj) = serializeUX JsonConfig.defaultConfig objekt
     let deserialize<'T> (json: string) = deserializeX<'T> JsonConfig.defaultConfig json
+    let tryDeserialize<'T> (json: string) = tryDeserializeX<'T> JsonConfig.defaultConfig json 
     let deserializeFromBytes<'T> (data: byte array) = deserializeFromBytesX<'T> JsonConfig.defaultConfig data
+    let tryDeserializeFromBytes<'T> (data: byte array) = tryDeserializeFromBytesX<'T> JsonConfig.defaultConfig data
     let jsonFields<'T> () = jsonFieldsX<'T> JsonConfig.defaultConfig
 
     type IJsonSerializer<'T> =
