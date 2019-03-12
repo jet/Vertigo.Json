@@ -3,14 +3,15 @@
 // --------------------------------------------------------------------------------------
 
 #r @"packages/build/FAKE/tools/FakeLib.dll"
-open Fake
-open Fake.Git
-open Fake.AssemblyInfoFile
-open Fake.ReleaseNotesHelper
-open Fake.UserInputHelper
+open Fake.Core
+open Fake.Core.TargetOperators
+open Fake.DotNet
+open Fake.Tools
+open Fake.IO.FileSystemOperators
+open Fake.IO.Globbing.Operators
+open Fake.IO
 
 open System
-open System.IO
 open System.Diagnostics
 
 // --------------------------------------------------------------------------------------
@@ -48,7 +49,7 @@ let solutionFile  = "Vertigo.Json.sln"
 let configuration = "Release"
 
 // Pattern specifying assemblies to be tested using NUnit
-let testAssemblies = "tests/**/bin" </> configuration </> "*Tests*.dll"
+let testAssemblies = "tests/**/bin" </> configuration </> "**/*Tests*.dll"
 
 // Git configuration (used for publishing documentation in gh-pages branch)
 // The profile where the project is posted
@@ -59,14 +60,14 @@ let gitHome = sprintf "%s/%s" "https://github.com" gitOwner
 let gitName = "Vertigo.Json"
 
 // The url for the raw files hosted
-let gitRaw = environVarOrDefault "gitRaw" "https://raw.githubusercontent.com/jet"
+let gitRaw = Environment.environVarOrDefault "gitRaw" "https://raw.githubusercontent.com/jet"
 
 // --------------------------------------------------------------------------------------
 // END TODO: The rest of the file includes standard build steps
 // --------------------------------------------------------------------------------------
 
 // Read additional information from the release notes document
-let release = LoadReleaseNotes "RELEASE_NOTES.md"
+let release = Fake.Core.ReleaseNotes.load "RELEASE_NOTES.md"
 
 printf "Release: %A" release
 
@@ -80,14 +81,14 @@ let (|Fsproj|Csproj|Vbproj|Shproj|) (projFileName:string) =
     | _                           -> failwith (sprintf "Project file %s not supported. Unknown project type." projFileName)
 
 // Generate assembly info files with the right version & up-to-date information
-Target "AssemblyInfo" (fun _ ->
+Fake.Core.Target.create "AssemblyInfo" (fun _ ->
     let getAssemblyInfoAttributes projectName =
-        [ Attribute.Title (projectName)
-          Attribute.Product project
-          Attribute.Description summary
-          Attribute.Version release.AssemblyVersion
-          Attribute.FileVersion release.AssemblyVersion
-          Attribute.Configuration configuration ]
+        [ AssemblyInfo.Title (projectName)
+          AssemblyInfo.Product project
+          AssemblyInfo.Description summary
+          AssemblyInfo.Version release.AssemblyVersion
+          AssemblyInfo.FileVersion release.AssemblyVersion
+          AssemblyInfo.Configuration configuration ]
 
     let getProjectDetails projectPath =
         let projectName = System.IO.Path.GetFileNameWithoutExtension(projectPath)
@@ -101,9 +102,9 @@ Target "AssemblyInfo" (fun _ ->
     |> Seq.map getProjectDetails
     |> Seq.iter (fun (projFileName, projectName, folderName, attributes) ->
         match projFileName with
-        | Fsproj -> CreateFSharpAssemblyInfo (folderName </> "AssemblyInfo.fs") attributes
-        | Csproj -> CreateCSharpAssemblyInfo ((folderName </> "Properties") </> "AssemblyInfo.cs") attributes
-        | Vbproj -> CreateVisualBasicAssemblyInfo ((folderName </> "My Project") </> "AssemblyInfo.vb") attributes
+        | Fsproj -> AssemblyInfoFile.createFSharp (folderName </> "AssemblyInfo.fs") attributes
+        | Csproj -> AssemblyInfoFile.createCSharp ((folderName </> "Properties") </> "AssemblyInfo.cs") attributes
+        | Vbproj -> AssemblyInfoFile.createVisualBasic ((folderName </> "My Project") </> "AssemblyInfo.vb") attributes
         | Shproj -> ()
         )
 )
@@ -111,11 +112,11 @@ Target "AssemblyInfo" (fun _ ->
 // Copies binaries from default VS location to expected bin folder
 // But keeps a subdirectory structure for each project in the
 // src folder to support multiple project outputs
-Target "CopyBinaries" (fun _ ->
+Fake.Core.Target.create "CopyBinaries" (fun _ ->
     !! "src/**/*.??proj"
     -- "src/**/*.shproj"
     |>  Seq.map (fun f -> ((System.IO.Path.GetDirectoryName f) </> "bin" </> configuration, "bin" </> (System.IO.Path.GetFileNameWithoutExtension f)))
-    |>  Seq.iter (fun (fromDir, toDir) -> CopyDir toDir fromDir (fun _ -> true))
+    |>  Seq.iter (fun (fromDir, toDir) -> Shell.copyDir toDir fromDir (fun _ -> true))
 )
 
 // --------------------------------------------------------------------------------------
@@ -128,46 +129,57 @@ let vsProjProps =
     [ ("Configuration", configuration); ("Platform", "Any CPU") ]
 #endif
 
-Target "Clean" (fun _ ->
-    !! solutionFile |> MSBuildReleaseExt "" vsProjProps "Clean" |> ignore
-    CleanDirs ["bin"; "temp"; "docs"]
+Fake.Core.Target.create "Clean" (fun _ ->
+    !! solutionFile |> MSBuild.runReleaseExt id "" vsProjProps "Clean" |> ignore
+    Shell.cleanDirs ["bin"; "temp"; "docs"]
 )
 
 // --------------------------------------------------------------------------------------
 // Build library & test project
 
-Target "Build" (fun _ ->
+Fake.Core.Target.create "Build" (fun _ ->
     !! solutionFile
-    |> MSBuildReleaseExt "" vsProjProps "Rebuild"
+    |> MSBuild.runReleaseExt id "" vsProjProps "Rebuild"
     |> ignore
 )
 
 // --------------------------------------------------------------------------------------
 // Run the unit tests using test runner
 
-Target "RunTests" (fun _ ->
+Fake.Core.Target.create "RunTests" (fun _ ->
     !! testAssemblies
-    |> NUnit (fun p ->
-        { p with
-            DisableShadowCopy = true
-            TimeOut = TimeSpan.FromMinutes 20.
-            OutputFile = "TestResults.xml" })
+    |> Seq.iter
+        (fun (assemblyPath:string) ->
+            printfn "=======%s" assemblyPath
+            let tempFile= new System.IO.FileInfo(assemblyPath)
+            //let framework = tempFile.Directory.Name
+            Testing.NUnit3.run
+                (fun p ->
+                    { p with
+                        //DisableShadowCopy = true
+                        TimeOut = TimeSpan.FromMinutes 20.
+                        //OutputFile = "TestResults.xml" 
+                        Framework = Testing.NUnit3.NUnit3Runtime.Default
+                    }
+                )
+                ([assemblyPath] |> List.toSeq)
+        )
 )
 
 
 // --------------------------------------------------------------------------------------
 // Build a NuGet package
 
-Target "NuGet" (fun _ ->
-    Paket.Pack(fun p ->
+Fake.Core.Target.create "NuGet" (fun _ ->
+    Paket.pack(fun p ->
         { p with
             OutputPath = "bin"
             Version = release.NugetVersion
-            ReleaseNotes = toLines release.Notes})
+            ReleaseNotes = Fake.Core.String.toLines release.Notes})
 )
 
-Target "PublishNuget" (fun _ ->
-    Paket.Push(fun p ->
+Fake.Core.Target.create "PublishNuget" (fun _ ->
+    Paket.push(fun p ->
         { p with
             PublishUrl = "https://www.nuget.org"
             WorkingDir = "bin" })
@@ -180,22 +192,30 @@ Target "PublishNuget" (fun _ ->
 
 let fakePath = "packages" </> "build" </> "FAKE" </> "tools" </> "FAKE.exe"
 let fakeStartInfo script workingDirectory args fsiargs environmentVars =
-    (fun (info: ProcessStartInfo) ->
-        info.FileName <- System.IO.Path.GetFullPath fakePath
-        info.Arguments <- sprintf "%s --fsiargs -d:FAKE %s \"%s\"" args fsiargs script
-        info.WorkingDirectory <- workingDirectory
-        let setVar k v =
-            info.EnvironmentVariables.[k] <- v
+    (fun (info: ProcStartInfo) ->
+        let stage1 = 
+            {info 
+                with 
+                    FileName = System.IO.Path.GetFullPath fakePath;
+                    Arguments = sprintf "%s --fsiargs -d:FAKE %s \"%s\"" args fsiargs script
+                    WorkingDirectory = workingDirectory
+            }
+        
+        let setVar k v (infot: ProcStartInfo) =
+            Process.setEnvironmentVariable k v infot
+            
         for (k, v) in environmentVars do
-            setVar k v
-        setVar "MSBuild" msBuildExe
-        setVar "GIT" Git.CommandHelper.gitPath
-        setVar "FSI" fsiPath)
+            setVar k v stage1
+
+        setVar "MSBuild" MSBuild.msBuildExe stage1
+        |> setVar "GIT" Git.CommandHelper.gitPath
+        |> setVar "FSI" Fake.FSIHelper.fsiPath
+        )
 
 /// Run the given buildscript with FAKE.exe
 let executeFAKEWithOutput workingDirectory script fsiargs envArgs =
     let exitCode =
-        ExecProcessWithLambdas
+         Process.execRaw// ExecProcessWithLambdas
             (fakeStartInfo script workingDirectory "" fsiargs envArgs)
             TimeSpan.MaxValue false ignore ignore
     System.Threading.Thread.Sleep 1000
@@ -203,13 +223,13 @@ let executeFAKEWithOutput workingDirectory script fsiargs envArgs =
 
 // Documentation
 let buildDocumentationTarget fsiargs target =
-    trace (sprintf "Building documentation (%s), this could take some time, please wait..." target)
+    Trace.log (sprintf "Building documentation (%s), this could take some time, please wait..." target)
     let exit = executeFAKEWithOutput "docsrc/tools" "generate.fsx" fsiargs ["target", target]
     if exit <> 0 then
         failwith "generating reference documentation failed"
     ()
 
-Target "GenerateReferenceDocs" (fun _ ->
+Fake.Core.Target.create "GenerateReferenceDocs" (fun _ ->
     buildDocumentationTarget "-d:RELEASE -d:REFERENCE" "Default"
 )
 
@@ -219,51 +239,51 @@ let generateHelp' fail debug =
         else "--define:RELEASE --define:HELP"
     try
         buildDocumentationTarget args "Default"
-        traceImportant "Help generated"
+        Trace.log "Help generated"
     with
     | e when not fail ->
-        traceImportant "generating help documentation failed"
+        Trace.log "generating help documentation failed"
 
 let generateHelp fail =
     generateHelp' fail false
 
-Target "GenerateHelp" (fun _ ->
-    DeleteFile "docsrc/content/release-notes.md"
-    CopyFile "docsrc/content/" "RELEASE_NOTES.md"
-    Rename "docsrc/content/release-notes.md" "docsrc/content/RELEASE_NOTES.md"
+Fake.Core.Target.create "GenerateHelp" (fun _ ->
+    File.delete "docsrc/content/release-notes.md"
+    Shell.copyFile "docsrc/content/" "RELEASE_NOTES.md"
+    Shell.rename "docsrc/content/release-notes.md" "docsrc/content/RELEASE_NOTES.md"
 
-    DeleteFile "docsrc/content/license.md"
-    CopyFile "docsrc/content/" "LICENSE.txt"
-    Rename "docsrc/content/license.md" "docsrc/content/LICENSE.txt"
+    File.delete "docsrc/content/license.md"
+    Shell.copyFile "docsrc/content/" "LICENSE"
+    Shell.rename "docsrc/content/license.md" "docsrc/content/LICENSE"
 
     generateHelp true
 )
 
-Target "GenerateHelpDebug" (fun _ ->
-    DeleteFile "docsrc/content/release-notes.md"
-    CopyFile "docsrc/content/" "RELEASE_NOTES.md"
-    Rename "docsrc/content/release-notes.md" "docsrc/content/RELEASE_NOTES.md"
+Fake.Core.Target.create "GenerateHelpDebug" (fun _ ->
+    File.delete "docsrc/content/release-notes.md"
+    Shell.copyFile "docsrc/content/" "RELEASE_NOTES.md"
+    Shell.rename "docsrc/content/release-notes.md" "docsrc/content/RELEASE_NOTES.md"
 
-    DeleteFile "docsrc/content/license.md"
-    CopyFile "docsrc/content/" "LICENSE.txt"
-    Rename "docsrc/content/license.md" "docsrc/content/LICENSE.txt"
+    File.delete "docsrc/content/license.md"
+    Shell.copyFile "docsrc/content/" "LICENSE"
+    Shell.rename "docsrc/content/license.md" "docsrc/content/LICENSE"
 
     generateHelp' true true
 )
 
-Target "KeepRunning" (fun _ ->
-    use watcher = !! "docsrc/content/**/*.*" |> WatchChanges (fun changes ->
+Fake.Core.Target.create "KeepRunning" (fun _ ->
+    use watcher = !! "docsrc/content/**/*.*" |> ChangeWatcher.run (fun changes ->
          generateHelp' true true
     )
 
-    traceImportant "Waiting for help edits. Press any key to stop."
+    Trace.log "Waiting for help edits. Press any key to stop."
 
     System.Console.ReadKey() |> ignore
 
     watcher.Dispose()
 )
 
-Target "GenerateDocs" DoNothing
+Fake.Core.Target.create "GenerateDocs" ignore
 
 let createIndexFsx lang =
     let content = """(*** hide ***)
@@ -278,10 +298,10 @@ F# Project Scaffold ({0})
 """
     let targetDir = "docsrc/content" </> lang
     let targetFile = targetDir </> "index.fsx"
-    ensureDirectory targetDir
+    Directory.ensure targetDir
     System.IO.File.WriteAllText(targetFile, System.String.Format(content, lang))
 
-Target "AddLangDocs" (fun _ ->
+Fake.Core.Target.create "AddLangDocs" (fun _ ->
     let args = System.Environment.GetCommandLineArgs()
     if args.Length < 4 then
         failwith "Language not specified."
@@ -299,8 +319,8 @@ Target "AddLangDocs" (fun _ ->
         if System.IO.File.Exists(langTemplateFileName) then
             failwithf "Documents for specified language '%s' have already been added." lang
 
-        ensureDirectory langTemplateDir
-        Copy langTemplateDir [ templateDir </> templateFileName ]
+        Directory.ensure langTemplateDir
+        Shell.copy langTemplateDir [ templateDir </> templateFileName ]
 
         createIndexFsx lang)
 )
@@ -311,27 +331,27 @@ Target "AddLangDocs" (fun _ ->
 #load "paket-files/build/fsharp/FAKE/modules/Octokit/Octokit.fsx"
 open Octokit
 
-Target "Release" (fun _ ->
+Fake.Core.Target.create "Release" (fun _ ->
     let user =
-        match getBuildParam "github-user" with
-        | s when not (String.IsNullOrWhiteSpace s) -> s
-        | _ -> getUserInput "Username: "
+        match (Environment.environVar "github-user") with
+        | s when (not (String.IsNullOrWhiteSpace s)) -> s
+        | _ -> UserInput.getUserInput "Username: "
     let pw =
-        match getBuildParam "github-pw" with
+        match Environment.environVar "github-pw" with
         | s when not (String.IsNullOrWhiteSpace s) -> s
-        | _ -> getUserPassword "Password: "
+        | _ -> UserInput.getUserPassword "Password: "
     let remote =
         Git.CommandHelper.getGitResult "" "remote -v"
         |> Seq.filter (fun (s: string) -> s.EndsWith("(push)"))
         |> Seq.tryFind (fun (s: string) -> s.Contains(gitOwner + "/" + gitName))
         |> function None -> gitHome + "/" + gitName | Some (s: string) -> s.Split().[0]
 
-    StageAll ""
-    Git.Commit.Commit "" (sprintf "Bump version to %s" release.NugetVersion)
-    Branches.pushBranch "" remote (Information.getBranchName "")
+    Git.Staging.stageAll ""
+    Git.Commit.exec "" (sprintf "Bump version to %s" release.NugetVersion)
+    Git.Branches.pushBranch "" remote (Git.Information.getBranchName "")
 
-    Branches.tag "" release.NugetVersion
-    Branches.pushTag "" remote release.NugetVersion
+    Git.Branches.tag "" release.NugetVersion
+    Git.Branches.pushTag "" remote release.NugetVersion
 
     // release on github
     createClient user pw
@@ -341,12 +361,12 @@ Target "Release" (fun _ ->
     |> Async.RunSynchronously
 )
 
-Target "BuildPackage" DoNothing
+Fake.Core.Target.create "BuildPackage" ignore
 
 // --------------------------------------------------------------------------------------
 // Run all targets by default. Invoke 'build <Target>' to override
 
-Target "All" DoNothing
+Fake.Core.Target.create "All" ignore
 
 "AssemblyInfo"
   ==> "Build"
@@ -372,4 +392,4 @@ Target "All" DoNothing
   ==> "PublishNuget"
   ==> "Release"
 
-RunTargetOrDefault "All"
+Fake.Core.Target.runOrDefault "All"
