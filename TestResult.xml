@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<test-run id="2" testcasecount="1" result="Failed" label="Error" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.10.0.0" clr-version="4.0.30319.42000" start-time="2019-03-25 03:36:47Z" end-time="2019-03-25 03:36:47Z" duration="0.592941">
+  <command-line><![CDATA["C:\Users\pavan.narendra\Work\Repos\Vertigo.Json\packages\test\NUnit.ConsoleRunner\tools\nunit3-console.exe" "@C:\Users\pavan.narendra\AppData\Local\Temp\tmpA9.tmp"]]></command-line>
+  <test-suite type="Assembly" id="0" name="" fullname="" runstate="NotRunnable" testcasecount="1" result="Failed" label="Error" start-time="2019-03-25 03:36:47Z" end-time="2019-03-25 03:36:47Z" duration="0.001" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+    <failure>
+      <message><![CDATA[NUnit.Engine.NUnitEngineException : The NUnit 3 driver encountered an error while executing reflected code.
+  ----> System.InvalidCastException : Unable to cast transparent proxy to type 'System.Web.UI.ICallbackEventHandler'.]]></message>
+      <stack-trace><![CDATA[--NUnitEngineException
+The NUnit 3 driver encountered an error while executing reflected code.
+
+Server stack trace: 
+   at NUnit.Engine.Drivers.NUnit3FrameworkDriver.CreateObject(String typeName, Object[] args)
+   at NUnit.Engine.Drivers.NUnit3FrameworkDriver.Load(String testAssemblyPath, IDictionary`2 settings)
+   at NUnit.Engine.Runners.DirectTestRunner.LoadDriver(IFrameworkDriver driver, String testFile, TestPackage subPackage)
+   at NUnit.Engine.Runners.DirectTestRunner.LoadPackage()
+   at NUnit.Engine.Runners.DirectTestRunner.EnsurePackageIsLoaded()
+   at NUnit.Engine.Runners.DirectTestRunner.RunTests(ITestEventListener listener, TestFilter filter)
+   at System.Runtime.Remoting.Messaging.StackBuilderSink._PrivateProcessMessage(IntPtr md, Object[] args, Object server, Object[]& outArgs)
+   at System.Runtime.Remoting.Messaging.StackBuilderSink.SyncProcessMessage(IMessage msg)
+
+Exception rethrown at [0]: 
+   at System.Runtime.Remoting.Proxies.RealProxy.HandleReturnMessage(IMessage reqMsg, IMessage retMsg)
+   at System.Runtime.Remoting.Proxies.RealProxy.PrivateInvoke(MessageData& msgData, Int32 type)
+   at NUnit.Engine.ITestEngineRunner.Run(ITestEventListener listener, TestFilter filter)
+   at NUnit.Engine.Runners.ProcessRunner.RunTests(ITestEventListener listener, TestFilter filter)
+--
+InvalidCastException
+Unable to cast transparent proxy to type 'System.Web.UI.ICallbackEventHandler'.
+   at NUnit.Framework.Api.FrameworkController.LoadTestsAction..ctor(FrameworkController controller, Object handler)
+]]></stack-trace>
+    </failure>
+  </test-suite>
+</test-run>

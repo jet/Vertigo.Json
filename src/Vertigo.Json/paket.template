@@ -1,4 +1,5 @@
-type project
+type file
+id Vertigo.Json
 title
     Vertigo.Json
 owners
@@ -13,13 +14,16 @@ licenseUrl
     https://github.com/jet/Vertigo.Json/blob/master/LICENSE.txt
 requireLicenseAcceptance
     false
+language
+    F#
 copyright
-    Copyright 2015
+    Copyright 2017
 tags
-    F# JSON
+    F# Fsharp JSON serialization deserialization
 summary
     F# JSON (de)serialization library
 description
-    F# JSON (de)serialization library
+    F# JSON Reflection based (de)serialization library
 
-
+files
+	../../bin/Vertigo.Json ==> lib

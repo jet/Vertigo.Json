@@ -3,15 +3,15 @@
 module Default =
     open System
     open Vertigo.Json
-    open NUnit.Framework
+    open Xunit
 
     type SimpleRecord = {
         [<JsonProperty(PropertyName="stringmember", DefaultValue = "Default")>]
         StringMember: string
     }
 
-    [<Test>]
+    [<Fact>]
     let ``Record deserialization from string`` () =
         let expected = { SimpleRecord.StringMember = "Default" }
         let actual = Json.deserialize<SimpleRecord>("{}")
-        Assert.AreEqual(expected, actual)
+        Assert.Equal(expected, actual)

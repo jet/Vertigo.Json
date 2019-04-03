@@ -2,7 +2,7 @@
 
 module Option = 
     open Vertigo.Json
-    open NUnit.Framework
+    open Xunit
 
     type OptionInt = {
         amember: int option
@@ -12,14 +12,14 @@ module Option =
         nested: OptionInt option
     }
 
-    [<Test>]
+    [<Fact>]
     let ``Option none primitive`` () =
         let value = { OptionInt.amember = None }
         let s = Json.serialize value
         let actual = Json.deserialize<OptionInt>(s)
-        Assert.AreEqual(value, actual)
+        Assert.Equal(value, actual)
 
-    [<Test>]
+    [<Fact>]
     let ``Option none from null`` () =
         let value = { OptionInt.amember = None }
         let s = Json.serialize value
@@ -27,31 +27,31 @@ module Option =
         let actual = Json.deserialize<OptionInt>(json)
         Assert.True(actual.amember.IsNone);
 
-    [<Test>]
+    [<Fact>]
     let ``None serialized into null`` () =
         let value = { OptionInt.amember = None }
         let config = JsonConfig.create (OptionBehaviour.NullForNone)
         let actual = Json.serializeUX config  value
-        Assert.AreEqual("""{"amember":null}""", actual)
+        Assert.Equal("""{"amember":null}""", actual)
 
-    [<Test>]
+    [<Fact>]
     let ``Option some primitive`` () =
         let value = { OptionInt.amember = Some 5 }
         let s = Json.serialize(value)
         let actual = Json.deserialize<OptionInt>(s)
-        Assert.AreEqual(value, actual)
+        Assert.Equal(value, actual)
 
-    [<Test>]
+    [<Fact>]
     let ``Option none record`` () =
         let value = { Container.nested = None }
         let s = Json.serialize value
         let actual = Json.deserialize<Container>(s)
-        Assert.AreEqual(value, actual)
+        Assert.Equal(value, actual)
 
-    [<Test>]
+    [<Fact>]
     let ``Option some record`` () =
         let value = { Container.nested = Some { OptionInt.amember = None } }
         let s = Json.serialize value
         let actual = Json.deserialize<Container>(s)
-        Assert.AreEqual(value, actual)
+        Assert.Equal(value, actual)
         

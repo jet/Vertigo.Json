@@ -4,19 +4,19 @@ module NullSafety =
     open System
     open Vertigo.Json
     open Vertigo.Json.Tracing
-    open NUnit.Framework
+    open Xunit
 
     type SimpleString = {
         amember: string
     }
 
-    [<Test>]
+    [<Fact>]
     let ``Null is not allowed for primitive non option`` () =
         let json = """{"amember": null}"""
         let ex = Assert.Throws<JsonDeserializationException>(fun () -> Json.deserialize<SimpleString>(json) |> ignore)
-        Assert.IsNotNull(ex)
+        Assert.NotNull(ex)
 
-    [<Test>]
+    [<Fact>]
     let ``Missing value is not allowed for primitive non option`` () =
         let ex = Assert.Throws<JsonDeserializationException>(fun () -> Json.deserialize<SimpleString>("{}") |> ignore)
-        Assert.IsNotNull(ex)
+        Assert.NotNull(ex)

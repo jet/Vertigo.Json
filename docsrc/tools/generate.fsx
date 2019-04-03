@@ -3,6 +3,8 @@
 // (the generated documentation is stored in the 'docsrc/output' directory)
 // --------------------------------------------------------------------------------------
 
+#load "./.fake/generate.fsx/intellisense.fsx"
+
 // Binaries that have XML documentation (in a corresponding generated XML file)
 // Any binary output / copied to bin/projectName/projectName.dll will
 // automatically be added as a binary to generate API docs for.
@@ -27,14 +29,33 @@ let info =
 // For typical project, no changes are needed below
 // --------------------------------------------------------------------------------------
 
-#load "../../packages/build/FSharp.Formatting/FSharp.Formatting.fsx"
-#I "../../packages/build/FAKE/tools/"
-#r "FakeLib.dll"
-open Fake
+#I "../.././packages/netcorebuild/Fake.IO.FileSystem/lib/netstandard2.0/"
+#I "../.././packages/netcorebuild/Fake.Core.Target/lib/netstandard2.0/"
+#I "../.././packages/netcorebuild/Fake.Core.Trace/lib/netstandard2.0/"
+
+#r @"../../packages/netcorebuild/Fake.Core.FakeVar/lib/netstandard2.0/Fake.Core.FakeVar.dll"
+#r @"../../packages/netcorebuild/Fake.Core.Environment/lib/netstandard2.0/Fake.Core.Environment.dll"
+#r @"../../packages/netcorebuild/Fake.Core.Context/lib/netstandard2.0/Fake.Core.Context.dll"
+
+#r "Fake.IO.FileSystem.dll"
+#r "Fake.Core.Trace.dll"
+#r "Fake.Core.Target.dll"
+
+#I "../.././packages/netcorebuild/FSharp.Formatting/lib/net40/"
+//#r "FSharp.Compiler.Service.dll"
+#r "FSharp.Literate.dll"
+#r "FSharp.MetadataFormat.dll"
+#r "RazorEngine.dll"
+//#r "FSharp.CodeFormat.dll"
+#r "FSharp.Markdown.dll"
+
+open Fake.IO
+open Fake.IO.Globbing.Operators
+open Fake.Core
 open System.IO
-open Fake.FileHelper
 open FSharp.Literate
 open FSharp.MetadataFormat
+open Fake.IO.FileSystemOperators
 
 // When called from 'build.fsx', use the public project URL as <root>
 // otherwise, use the current 'output' directory.
@@ -50,14 +71,14 @@ let content    = __SOURCE_DIRECTORY__ @@ "../content"
 let output     = __SOURCE_DIRECTORY__ @@ "../../docs"
 let files      = __SOURCE_DIRECTORY__ @@ "../files"
 let templates  = __SOURCE_DIRECTORY__ @@ "templates"
-let formatting = __SOURCE_DIRECTORY__ @@ "../../packages/build/FSharp.Formatting/"
+let formatting = __SOURCE_DIRECTORY__ @@ "../.././packages/netcorebuild/FSharp.Formatting/"
 let docTemplate = "docpage.cshtml"
 
 // Where to look for *.csproj templates (in this order)
 let layoutRootsAll = new System.Collections.Generic.Dictionary<string, string list>()
 layoutRootsAll.Add("en",[ templates; formatting @@ "templates"
                           formatting @@ "templates/reference" ])
-subDirectories (directoryInfo templates)
+DirectoryInfo.getSubDirectories (DirectoryInfo.ofPath templates)
 |> Seq.iter (fun d ->
                 let name = d.Name
                 if name.Length = 2 || name.Length = 3 then
@@ -68,10 +89,10 @@ subDirectories (directoryInfo templates)
 
 // Copy static files and CSS + JS from F# Formatting
 let copyFiles () =
-  CopyRecursive files output true |> Log "Copying file: "
-  ensureDirectory (output @@ "content")
-  CopyRecursive (formatting @@ "styles") (output @@ "content") true 
-    |> Log "Copying styles and scripts: "
+  Shell.copyRecursive files output true |> Trace.logItems "Copying file: "
+  Directory.ensure (output @@ "content")
+  Shell.copyRecursive (formatting @@ "styles") (output @@ "content") true 
+    |> Trace.logItems "Copying styles and scripts: "
 
 let binaries =
     let manuallyAdded = 
@@ -79,8 +100,8 @@ let binaries =
         |> List.map (fun b -> bin @@ b)
     
     let conventionBased = 
-        directoryInfo bin 
-        |> subDirectories
+        DirectoryInfo.ofPath bin 
+        |> DirectoryInfo.getSubDirectories
         |> Array.map (fun d -> d.FullName @@ (sprintf "%s.dll" d.Name))
         |> List.ofArray
 
@@ -88,8 +109,8 @@ let binaries =
 
 let libDirs =
     let conventionBasedbinDirs =
-        directoryInfo bin 
-        |> subDirectories
+        DirectoryInfo.ofPath bin 
+        |> DirectoryInfo.getSubDirectories
         |> Array.map (fun d -> d.FullName)
         |> List.ofArray
 
@@ -97,7 +118,7 @@ let libDirs =
 
 // Build API reference from XML comments
 let buildReference () =
-  CleanDir (output @@ "reference")
+  Shell.cleanDir (output @@ "reference")
   MetadataFormat.Generate
     ( binaries, output @@ "reference", layoutRootsAll.["en"],
       parameters = ("root", root)::info,

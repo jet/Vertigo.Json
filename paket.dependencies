@@ -1,5 +1,9 @@
-framework: >= net45
+framework: auto-detect
+
 source https://nuget.org/api/v2
+source https://api.nuget.org/v3/index.json
+framework: netstandard2.0, net452
+redirects: force
 
 # The setting below means your libraries will assume a minimum target of .NET 4.5 + F# 4.0.
 #
@@ -8,18 +12,42 @@ source https://nuget.org/api/v2
 # To increase the minimum assumed F# version to F# 4.1, change to 
 #     nuget FSharp.Core ~> 4.1.0 redirects: force
 
-nuget FSharp.Core >= 4.0.0.1 redirects: force
+nuget FSharp.Core >= 4.0.0.1 redirects: force 
 
-group Build
-  source https://nuget.org/api/v2
-  
-  nuget FAKE
-  nuget FSharp.Formatting
+clitool dotnet-fake
 
-  github fsharp/FAKE modules/Octokit/Octokit.fsx
+// [ FAKE GROUP ]
+group Formatting
+source https://nuget.org/api/v2
+source https://ci.appveyor.com/nuget/fsharp-formatting
+
+nuget FSharp.Formatting prerelease
+nuget FSharp.Formatting.CommandTool prerelease
+
+group FakeBuild
+source https://api.nuget.org/v3/index.json
+
+storage: none
+
+nuget Fake.Core.Target
+nuget Fake.IO.FileSystem
+nuget Fake.DotNet.Cli
+nuget Fake.Tools.Git
+nuget Fake.DotNet.MSBuild
+nuget Fake.Core.ReleaseNotes 
+nuget Fake.DotNet.AssemblyInfoFile
+nuget Fake.DotNet.Paket
+nuget Fake.DotNet.Testing.XUnit2
+nuget Fake.DotNet.FSFormatting 
+nuget Fake.Api.GitHub
 
 group Test
   source https://nuget.org/api/v2
-  
-  nuget NUnit ~> 2
-  nuget NUnit.Runners ~> 2
+  source https://api.nuget.org/v3/index.json
+  framework: netcoreapp2.0, net452
+  redirects: force
+
+  nuget System.Runtime
+  nuget xunit
+  nuget xunit.runner.console 
+

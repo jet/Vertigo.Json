@@ -24,4 +24,4 @@ let data = Json.deserialize<YourType> json
 
 ## Maintainer(s)
 
-- [@tombert](https://github.com/tombert)
+- [@precisemath]
