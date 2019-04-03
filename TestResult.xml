@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<test-run id="2" testcasecount="1" result="Failed" label="Error" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.9.0.0" clr-version="4.0.30319.42000" start-time="2019-03-12 15:23:13Z" end-time="2019-03-12 15:23:14Z" duration="0.657546">
-  <command-line><![CDATA["C:\Users\pavan.narendra\Work\Repos\Vertigo.Json\packages\test\NUnit.ConsoleRunner\tools\nunit3-console.exe" "--noheader" "--timeout=1200000" "C:\Users\pavan.narendra\Work\Repos\Vertigo.Json\tests\Vertigo.Json.Tests\bin\Release\netcoreapp2.0\Vertigo.Json.Tests.dll" ]]></command-line>
-  <test-suite type="Assembly" id="0" name="" fullname="" runstate="NotRunnable" testcasecount="1" result="Failed" label="Error" start-time="2019-03-12 15:23:14Z" end-time="2019-03-12 15:23:14Z" duration="0.001" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+<test-run id="2" testcasecount="1" result="Failed" label="Error" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.10.0.0" clr-version="4.0.30319.42000" start-time="2019-03-25 03:36:47Z" end-time="2019-03-25 03:36:47Z" duration="0.592941">
+  <command-line><![CDATA["C:\Users\pavan.narendra\Work\Repos\Vertigo.Json\packages\test\NUnit.ConsoleRunner\tools\nunit3-console.exe" "@C:\Users\pavan.narendra\AppData\Local\Temp\tmpA9.tmp"]]></command-line>
+  <test-suite type="Assembly" id="0" name="" fullname="" runstate="NotRunnable" testcasecount="1" result="Failed" label="Error" start-time="2019-03-25 03:36:47Z" end-time="2019-03-25 03:36:47Z" duration="0.001" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
     <failure>
       <message><![CDATA[NUnit.Engine.NUnitEngineException : The NUnit 3 driver encountered an error while executing reflected code.
   ----> System.InvalidCastException : Unable to cast transparent proxy to type 'System.Web.UI.ICallbackEventHandler'.]]></message>
@@ -26,7 +26,7 @@ Exception rethrown at [0]:
 --
 InvalidCastException
 Unable to cast transparent proxy to type 'System.Web.UI.ICallbackEventHandler'.
-   at NUnit.Framework.Api.FrameworkController.LoadTestsAction..ctor(FrameworkController controller, Object handler) in C:\src\nunit\nunit\src\NUnitFramework\framework\Api\FrameworkController.cs:line 504
+   at NUnit.Framework.Api.FrameworkController.LoadTestsAction..ctor(FrameworkController controller, Object handler)
 ]]></stack-trace>
     </failure>
   </test-suite>

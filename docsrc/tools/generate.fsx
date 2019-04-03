@@ -3,6 +3,8 @@
 // (the generated documentation is stored in the 'docsrc/output' directory)
 // --------------------------------------------------------------------------------------
 
+#load "./.fake/generate.fsx/intellisense.fsx"
+
 // Binaries that have XML documentation (in a corresponding generated XML file)
 // Any binary output / copied to bin/projectName/projectName.dll will
 // automatically be added as a binary to generate API docs for.
@@ -27,10 +29,28 @@ let info =
 // For typical project, no changes are needed below
 // --------------------------------------------------------------------------------------
 
-#load "../../packages/build/FSharp.Formatting/FSharp.Formatting.fsx"
-#I "../../packages/build/FAKE/tools/"
-#r "FakeLib.dll"
+#I "../.././packages/netcorebuild/Fake.IO.FileSystem/lib/netstandard2.0/"
+#I "../.././packages/netcorebuild/Fake.Core.Target/lib/netstandard2.0/"
+#I "../.././packages/netcorebuild/Fake.Core.Trace/lib/netstandard2.0/"
+
+#r @"../../packages/netcorebuild/Fake.Core.FakeVar/lib/netstandard2.0/Fake.Core.FakeVar.dll"
+#r @"../../packages/netcorebuild/Fake.Core.Environment/lib/netstandard2.0/Fake.Core.Environment.dll"
+#r @"../../packages/netcorebuild/Fake.Core.Context/lib/netstandard2.0/Fake.Core.Context.dll"
+
+#r "Fake.IO.FileSystem.dll"
+#r "Fake.Core.Trace.dll"
+#r "Fake.Core.Target.dll"
+
+#I "../.././packages/netcorebuild/FSharp.Formatting/lib/net40/"
+//#r "FSharp.Compiler.Service.dll"
+#r "FSharp.Literate.dll"
+#r "FSharp.MetadataFormat.dll"
+#r "RazorEngine.dll"
+//#r "FSharp.CodeFormat.dll"
+#r "FSharp.Markdown.dll"
+
 open Fake.IO
+open Fake.IO.Globbing.Operators
 open Fake.Core
 open System.IO
 open FSharp.Literate
@@ -51,7 +71,7 @@ let content    = __SOURCE_DIRECTORY__ @@ "../content"
 let output     = __SOURCE_DIRECTORY__ @@ "../../docs"
 let files      = __SOURCE_DIRECTORY__ @@ "../files"
 let templates  = __SOURCE_DIRECTORY__ @@ "templates"
-let formatting = __SOURCE_DIRECTORY__ @@ "../../packages/build/FSharp.Formatting/"
+let formatting = __SOURCE_DIRECTORY__ @@ "../.././packages/netcorebuild/FSharp.Formatting/"
 let docTemplate = "docpage.cshtml"
 
 // Where to look for *.csproj templates (in this order)

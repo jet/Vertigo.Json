@@ -3,7 +3,7 @@
 module Array =
     open System
     open Vertigo.Json
-    open NUnit.Framework
+    open Xunit
 
     type StringArray = {
         amember: string array
@@ -17,42 +17,42 @@ module Array =
         amember: int array
     }
 
-    [<Test>]
+    [<Fact>]
     let ``Array of strings serialization to string`` () =
         let expected = """{"amember":["some","text"]}"""
         let value = { StringArray.amember = [|"some"; "text"|] }
         let json = Json.serializeU value
-        Assert.AreEqual(expected, json)
+        Assert.Equal(expected, json)
 
-    [<Test>]
+    [<Fact>]
     let ``Array of strings serialization`` () =
         let value = { StringArray.amember = [|"some"; "text"|] }
         let json = Json.serialize(value)
         let actual = Json.deserialize<StringArray>(json)
-        Assert.AreEqual(value, actual)
+        Assert.Equal(value, actual)
 
-    [<Test>]
+    [<Fact>]
     let ``Array of ints serialization`` () =
         let value = { IntArray.amember = [|3; 4|] }
         let json = Json.serialize(value)
         let actual = Json.deserialize<IntArray>(json)
-        Assert.AreEqual(value, actual)
+        Assert.Equal(value, actual)
 
-    [<Test>]
+    [<Fact>]
     let ``Array of strings option none to string`` () =
         let expected = """{"amember":null}"""
         let value = { StringArrayOption.amember = None }
         let config = JsonConfig.create (OptionBehaviour.NullForNone)
         let json = Json.serializeUX config  value
-        Assert.AreEqual(expected, json)
+        Assert.Equal(expected, json)
 
-    [<Test>]
+    [<Fact>]
     let ``Array of strings option none from string`` () =
         let json = """{"amember":null}"""
         let expected = { StringArrayOption.amember = None }
         let actual = Json.deserialize<StringArrayOption> json
-        Assert.AreEqual(expected, actual)
+        Assert.Equal(expected, actual)
 
-    [<Test>]
+    [<Fact>]
     let ``Array missing from string`` () =
         Assert.Throws<JsonDeserializationException>(fun () -> Json.deserialize<StringArray> "{}" |> ignore) |> ignore
