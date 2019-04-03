@@ -19,7 +19,7 @@ language
 copyright
     Copyright 2017
 tags
-    F# Fsharp JSON Library serialization deserialization Jet.com
+    F# Fsharp JSON serialization deserialization
 summary
     F# JSON (de)serialization library
 description
