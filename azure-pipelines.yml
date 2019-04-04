@@ -13,7 +13,7 @@ jobs:
       $isPR = "$env:SYSTEM_PULLREQUEST_PULLREQUESTNUMBER" -ne ""
       $versionSuffix = if ($isTag) { "" } else { if ($isPR) { $versionSuffixPR } else { $versionSuffixBRANCH } };
       Write-Host "##vso[task.setvariable variable=VersionSuffix]$versionSuffix";
-  - script: dotnet pack build.proj -v n
+  - script: build.cmd -t Nuget
     displayName: Create package
     env:
       VersionSuffix: '$(VersionSuffix)'
