@@ -7,12 +7,17 @@ set -eu
 set -o pipefail
 
 fake_tool_path=packages/tools
+bin_dir="bin"
 
 dotnet restore build.proj
 
 #Check if the fake tool is installed
 if [ ! -f $fake_tool_path/fake ]; then
    dotnet tool install fake-cli --tool-path $fake_tool_path
+fi
+
+if [ ! -d $bin_dir ]; then
+    mkdir $bin_dir
 fi
 
 if [ ! -f build.fsx ]; then
