@@ -28,7 +28,7 @@ jobs:
     condition: succeededOrFailed()
   - task: PublishBuildArtifacts@1
     inputs:
-      pathtoPublish: 'bin/nupkg'
+      pathtoPublish: 'bin'
       artifactName: 'nupkgs'
   - task: NuGetCommand@2
     condition: and(succeeded(), or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/master')))
@@ -38,7 +38,7 @@ jobs:
       publishFeedCredentials: 'Jet-MyGet'
       versioningScheme: byEnvVar
       versionEnvVar: Version
-      packagesToPush: 'bin/nupkg/*.nupkg;bin/nupkg/*.symbols.nupkg'
+      packagesToPush: 'bin/*.nupkg;bin/*.symbols.nupkg'
 - job: Linux
   pool:
     vmImage: 'ubuntu-16.04'
