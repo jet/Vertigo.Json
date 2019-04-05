@@ -45,9 +45,9 @@ jobs:
   steps:
   - script: echo "##vso[task.setvariable variable=FrameworkPathOverride]$(dirname $(which mono))/../lib/mono/4.5/"
     displayName: Workaround .NET reference assemblies on linux
-  - script: bash build.sh -t Nuget
+  - script: dotnet pack build.proj -v n 
     displayName: Create package
-  - script: bash build.sh -t RunTests
+  - script: dotnet test build.proj -v n
     displayName: Run tests
   - task: PublishTestResults@2
     inputs:
@@ -60,9 +60,9 @@ jobs:
   steps:
   - script: echo "##vso[task.setvariable variable=FrameworkPathOverride]$(dirname $(which mono))/../lib/mono/4.5/"
     displayName: Workaround .NET reference assemblies on linux
-  - script: bash build.sh -t Nuget
+  - script: dotnet pack build.proj -v n
     displayName: Create package
-  - script: bash build.sh -t RunTests
+  - script: dotnet test build.proj -v n
     displayName: Run tests
   - task: PublishTestResults@2
     inputs:
