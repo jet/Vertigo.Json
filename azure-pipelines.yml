@@ -17,7 +17,7 @@ jobs:
     displayName: Create package
     env:
       VersionSuffix: '$(VersionSuffix)'
-  - script: dotnet test build.proj -v n
+  - script: build.cmd -t RunTests
     displayName: Run tests
     env:
       VersionSuffix: '$(VersionSuffix)'
@@ -38,16 +38,16 @@ jobs:
       publishFeedCredentials: 'Jet-MyGet'
       versioningScheme: byEnvVar
       versionEnvVar: Version
-      packagesToPush: 'bin/*.nupkg;bin/*.symbols.nupkg'
+      packagesToPush: _none
 - job: Linux
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
   - script: echo "##vso[task.setvariable variable=FrameworkPathOverride]$(dirname $(which mono))/../lib/mono/4.5/"
     displayName: Workaround .NET reference assemblies on linux
-  - script: dotnet pack build.proj -v n
+  - script: build.sh -t Nuget
     displayName: Create package
-  - script: dotnet test build.proj -v n
+  - script: build.sh -t RunTests
     displayName: Run tests
   - task: PublishTestResults@2
     inputs:
@@ -60,9 +60,9 @@ jobs:
   steps:
   - script: echo "##vso[task.setvariable variable=FrameworkPathOverride]$(dirname $(which mono))/../lib/mono/4.5/"
     displayName: Workaround .NET reference assemblies on linux
-  - script: dotnet pack build.proj -v n
+  - script: build.sh -t Nuget
     displayName: Create package
-  - script: dotnet test build.proj -v n
+  - script: build.sh -t RunTests
     displayName: Run tests
   - task: PublishTestResults@2
     inputs:
