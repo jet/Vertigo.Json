@@ -213,7 +213,7 @@ Target.create "RunTests" (fun _ ->
 Target.create "NuGet" (fun _ ->
     Paket.pack(fun p ->
         { p with
-            OutputPath = "bin"
+            OutputPath = "bin/nupkg"
             Version = release.NugetVersion
             ReleaseNotes = String.toLines release.Notes})
 )
@@ -222,7 +222,7 @@ Target.create "PublishNuget" (fun _ ->
     Paket.push(fun p ->
         { p with
             PublishUrl = "https://www.nuget.org"
-            WorkingDir = "bin" })
+            WorkingDir = "bin/nupkg" })
 )
 
 
