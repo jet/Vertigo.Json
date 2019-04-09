@@ -1,20 +1,13 @@
-framework: auto-detect
-
-source https://nuget.org/api/v2
 source https://api.nuget.org/v3/index.json
-framework: netstandard2.0, net452
-redirects: force
+framework: netstandard2.0, net452, netcoreapp2.1
+storage: none
 
-# The setting below means your libraries will assume a minimum target of .NET 4.5 + F# 4.0.
-#
-# To increase the minimum assumed .NET Framework, change the TargetFrameworkVersion in the .fsproj project files.
-#
-# To increase the minimum assumed F# version to F# 4.1, change to 
-#     nuget FSharp.Core ~> 4.1.0 redirects: force
+nuget FSharp.Core >= 4.3.4 lowest_matching:true
 
-nuget FSharp.Core >= 4.0.0.1 redirects: force 
+nuget Microsoft.NET.Test.Sdk ~> 15
+nuget xunit ~> 2.3
+nuget xunit.runner.visualstudio ~> 2.3
 
-clitool dotnet-fake
 
 // [ FAKE GROUP ]
 group Formatting
@@ -40,14 +33,4 @@ nuget Fake.DotNet.Paket
 nuget Fake.DotNet.Testing.XUnit2
 nuget Fake.DotNet.FSFormatting 
 nuget Fake.Api.GitHub
-
-group Test
-  source https://nuget.org/api/v2
-  source https://api.nuget.org/v3/index.json
-  framework: netcoreapp2.0, net452
-  redirects: force
-
-  nuget System.Runtime
-  nuget xunit
-  nuget xunit.runner.console 
 

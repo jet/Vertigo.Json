@@ -1,13 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.0;net452;</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.1;net452;</TargetFrameworks>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
     <None Include="paket.references" />
-    <Content Include="App.config" />
     <Compile Include="Primitive.fs" />
     <Compile Include="Record.fs" />
     <Compile Include="Mutable.fs" />
@@ -27,24 +26,7 @@
     <Compile Include="Config.fs" />
   </ItemGroup>
   <ItemGroup>
-     <Reference Include="FSharp.Core">
-       <HintPath>..\..\packages\FSharp.Core\lib\net45\FSharp.Core.dll</HintPath>
-     </Reference>
-     <Reference Include="mscorlib">
-       <HintPath>..\..\packages\test\NETStandard.Library\build\netstandard2.0\ref\mscorlib.dll</HintPath>
-     </Reference>
-     <Reference Include="netstandard">
-       <HintPath>..\..\packages\test\NETStandard.Library\build\netstandard2.0\ref\netstandard.dll</HintPath>
-     </Reference>
-     <Reference Include="System.Diagnostics.Debug">
-       <HintPath>..\..\packages\test\NETStandard.Library\build\netstandard2.0\ref\System.Diagnostics.Debug.dll</HintPath>
-     </Reference>
-     <Reference Include="System.Runtime">
-       <HintPath>..\..\packages\test\NETStandard.Library\build\netstandard2.0\ref\System.Runtime.dll</HintPath>
-     </Reference>
-     <Reference Include="Vertigo.Json">
-      <HintPath>..\..\src\Vertigo.Json\bin\Release\netstandard2.0\Vertigo.Json.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\..\src\Vertigo.Json\Vertigo.Json.fsproj" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

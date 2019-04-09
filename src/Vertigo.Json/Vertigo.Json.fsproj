@@ -18,7 +18,6 @@
   <ItemGroup>
     <None Include="paket.references" />
     <None Include="paket.template" />
-    <Content Include="App.config" />
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="TextConversions.fs" />
     <Compile Include="JsonValue.FSharpData.fs" />
