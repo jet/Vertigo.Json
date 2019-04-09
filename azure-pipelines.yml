@@ -13,10 +13,6 @@ jobs:
       $isPR = "$env:SYSTEM_PULLREQUEST_PULLREQUESTNUMBER" -ne ""
       $versionSuffix = if ($isTag) { "" } else { if ($isPR) { $versionSuffixPR } else { $versionSuffixBRANCH } };
       Write-Host "##vso[task.setvariable variable=VersionSuffix]$versionSuffix";
-  - script: build.cmd -t Nuget
-    displayName: Create package
-    env:
-      VersionSuffix: '$(VersionSuffix)'
   - script: build.cmd -t RunTests
     displayName: Run tests
     env:
@@ -26,9 +22,13 @@ jobs:
       testResultsFormat: 'VSTest'
       testResultsFiles: 'tests/**/*.trx'
     condition: succeededOrFailed()
+  - script: build.cmd -t Nuget
+    displayName: Create package
+    env:
+      VersionSuffix: '$(VersionSuffix)'
   - task: PublishBuildArtifacts@1
     inputs:
-      pathtoPublish: 'bin'
+      pathtoPublish: 'bin/nupkg'
       artifactName: 'nupkgs'
   - task: NuGetCommand@2
     condition: and(succeeded(), or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/master')))
