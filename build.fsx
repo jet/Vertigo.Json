@@ -22,7 +22,6 @@ open Fake.Api
 // --------------------------------------------------------------------------------------
 
 // Information about the project are used
-//  - for version and project name in generated AssemblyInfo file
 //  - by the generated NuGet package
 //  - to run tests and to publish documentation on GitHub gh-pages
 //  - for documentation, you also need to edit info in "docsrc/tools/generate.fsx"
@@ -51,9 +50,6 @@ let solutionFile  = "Vertigo.Json.sln"
 // Default target configuration
 let configuration = "Release"
 
-// Pattern specifying assemblies to be tested using NUnit
-let testAssemblies = "tests/**/bin" </> configuration </> "**/*Tests*.dll"
-
 // Git configuration (used for publishing documentation in gh-pages branch)
 // The profile where the project is posted
 let gitOwner = "jet"
@@ -76,53 +72,7 @@ let release = ReleaseNotes.load "RELEASE_NOTES.md"
 
 printf "Release: %A" release
 
-// Helper active pattern for project types
-let (|Fsproj|Csproj|Vbproj|Shproj|) (projFileName:string) =
-    match projFileName with
-    | f when f.EndsWith("fsproj") -> Fsproj
-    | f when f.EndsWith("csproj") -> Csproj
-    | f when f.EndsWith("vbproj") -> Vbproj
-    | f when f.EndsWith("shproj") -> Shproj
-    | _                           -> failwith (sprintf "Project file %s not supported. Unknown project type." projFileName)
-
-// Generate assembly info files with the right version & up-to-date information
-Target.create "AssemblyInfo" (fun _ ->
-    let getAssemblyInfoAttributes projectName =
-        [ AssemblyInfo.Title (projectName)
-          AssemblyInfo.Product project
-          AssemblyInfo.Description summary
-          AssemblyInfo.Version release.AssemblyVersion
-          AssemblyInfo.FileVersion release.AssemblyVersion
-          AssemblyInfo.Configuration configuration ]
-
-    let getProjectDetails projectPath =
-        let projectName = Path.GetFileNameWithoutExtension(projectPath)
-        ( projectPath,
-          projectName,
-          Path.GetDirectoryName(projectPath),
-          (getAssemblyInfoAttributes projectName)
-        )
-
-    !! "src/**/*.??proj"
-    |> Seq.map getProjectDetails
-    |> Seq.iter (fun (projFileName, _, folderName, attributes) ->
-        match projFileName with
-        | Fsproj -> AssemblyInfoFile.createFSharp (folderName </> "AssemblyInfo.fs") attributes
-        | Csproj -> AssemblyInfoFile.createCSharp ((folderName </> "Properties") </> "AssemblyInfo.cs") attributes
-        | Vbproj -> AssemblyInfoFile.createVisualBasic ((folderName </> "My Project") </> "AssemblyInfo.vb") attributes
-        | Shproj -> ()
-        )
-)
-
-// Copies binaries from default VS location to expected bin folder
-// But keeps a subdirectory structure for each project in the
-// src folder to support multiple project outputs
-Target.create "CopyBinaries" (fun _ ->
-    !! "src/**/*.??proj"
-    -- "src/**/*.shproj"
-    |>  Seq.map (fun f -> ((Path.getDirectory f) </> "bin" </> configuration, "bin" </> (Path.GetFileNameWithoutExtension f)))
-    |>  Seq.iter (fun (fromDir, toDir) -> Shell.copyDir toDir fromDir (fun _ -> true))
-)
+let version = release.NugetVersion
 
 // --------------------------------------------------------------------------------------
 // Clean build results
@@ -140,89 +90,35 @@ Target.create "CleanDocs" (fun _ ->
 // --------------------------------------------------------------------------------------
 // Build library & test project
 
-Target.create "Restore" (fun _ ->
-    solutionFile
-    |> DotNet.restore id
-)
-
 Target.create "Build" (fun _ ->
-    (*solutionFile
+    solutionFile
     |> DotNet.build (fun p ->
         { p with
-            Configuration = buildConfiguration })*)
-    let setParams (defaults:MSBuildParams) =
-        { defaults with
-            Verbosity = Some(Quiet)
-            Targets = ["Build"]
-            Properties =
-                [
-                    "Optimize", "True"
-                    "DebugSymbols", "True"
-                    "Configuration", configuration
-                ]
-         }
-    MSBuild.build setParams solutionFile
+            Configuration = buildConfiguration
+            Common = { p.Common with CustomParams = Some (sprintf "/p:Version=%s" version) } })
 )
 
 // --------------------------------------------------------------------------------------
 // Run the unit tests using test runner
 
 Target.create "RunTests" (fun _ ->
-    let assemblies = !! testAssemblies
-
-    let setParams f =
-        match Environment.isWindows with
-        | true ->
-            fun p ->
-                { p with
-                    FileName = f}
-        | false ->
-            fun p ->
-                { p with
-                    FileName = "mono"
-                    Arguments = f }
-    
-    assemblies
-    |> Seq.iter 
-        ( fun (assembly) ->
-            try
-                Testing.XUnit2.run
-                    (fun p ->
-                        { p with
-                            ShadowCopy = false;
-                            TimeOut = System.TimeSpan.FromMinutes 1.;
-                            XmlOutputPath = Some("TestResults.xml");
-                        }
-                    ) ([assembly] |> List.toSeq)
-            with
-            | :? System.AppDomainUnloadedException ->
-                    Trace.log "=============Here1!============="
-                    Trace.log "Warning: Unexpected exception. Ignoring..."
-            | ex ->
-                Trace.log "=============Here!============="
-                Trace.log (sprintf "%A" (ex.InnerException))
-                Trace.log (sprintf "%A" (ex.ToString()))
-                //failwith (sprintf "%A" (ex.ToString()))
-                ()
-       )
+    solutionFile
+    |> DotNet.test (fun p ->
+        { p with
+            Configuration = buildConfiguration
+            NoBuild = true })
 )
 
 // --------------------------------------------------------------------------------------
 // Build a NuGet package
 
 Target.create "NuGet" (fun _ ->
-    Paket.pack(fun p ->
+    solutionFile
+    |> DotNet.pack (fun p ->
         { p with
-            OutputPath = "bin/nupkg"
-            Version = release.NugetVersion
-            ReleaseNotes = String.toLines release.Notes})
-)
-
-Target.create "PublishNuget" (fun _ ->
-    Paket.push(fun p ->
-        { p with
-            PublishUrl = "https://www.nuget.org"
-            WorkingDir = "bin/nupkg" })
+            OutputPath = Some "bin/nupkg"
+            NoBuild = true
+            Configuration = buildConfiguration })
 )
 
 
@@ -251,7 +147,7 @@ let info =
 
 let root = website
 
-let referenceBinaries = []
+let referenceBinaries = [ "src/Vertigo.Json/bin/Release/net452/Vertigo.Json.dll" ]
 
 let layoutRootsAll = new System.Collections.Generic.Dictionary<string, string list>()
 layoutRootsAll.Add("en",[   templates;
@@ -261,34 +157,7 @@ layoutRootsAll.Add("en",[   templates;
 Target.create "ReferenceDocs" (fun _ ->
     Directory.ensure (output @@ "reference")
 
-    let binaries () =
-        let manuallyAdded =
-            referenceBinaries
-            |> List.map (fun b -> bin @@ b)
-
-        let conventionBased =
-            DirectoryInfo.getSubDirectories <| DirectoryInfo bin
-            |> Array.collect (fun d ->
-                let name, dInfo =
-                    let net45Bin =
-                        DirectoryInfo.getSubDirectories d |> Array.filter(fun x -> x.FullName.ToLower().Contains("net45"))
-                    let net47Bin =
-                        DirectoryInfo.getSubDirectories d |> Array.filter(fun x -> x.FullName.ToLower().Contains("net47"))
-                    if net45Bin.Length > 0 then
-                        d.Name, net45Bin.[0]
-                    else
-                        d.Name, net47Bin.[0]
-
-                dInfo.GetFiles()
-                |> Array.filter (fun x ->
-                    x.Name.ToLower() = (sprintf "%s.dll" name).ToLower())
-                |> Array.map (fun x -> x.FullName)
-                )
-            |> List.ofArray
-
-        conventionBased @ manuallyAdded
-
-    binaries()
+    referenceBinaries
     |> FSFormatting.createDocsForDlls (fun args ->
         { args with
             OutputDirectory = output @@ "reference"
@@ -344,55 +213,9 @@ Target.create "Docs" (fun _ ->
                 Template = docTemplate } )
 )
 
-// --------------------------------------------------------------------------------------
-// Release Scripts
-
-//#load "paket-files/fsharp/FAKE/modules/Octokit/Octokit.fsx"
-//open Octokit
-
-Target.create "Release" (fun _ ->
-    // not fully converted from  FAKE 4
-
-    //let user =
-    //    match getBuildParam "github-user" with
-    //    | s when not (String.isNullOrWhiteSpace s) -> s
-    //    | _ -> getUserInput "Username: "
-    //let pw =
-    //    match getBuildParam "github-pw" with
-    //    | s when not (String.isNullOrWhiteSpace s) -> s
-    //    | _ -> getUserPassword "Password: "
-    //let remote =
-    //    Git.CommandHelper.getGitResult "" "remote -v"
-    //    |> Seq.filter (fun (s: string) -> s.EndsWith("(push)"))
-    //    |> Seq.tryFind (fun (s: string) -> s.Contains(gitOwner + "/" + gitName))
-    //    |> function None -> gitHome + "/" + gitName | Some (s: string) -> s.Split().[0]
-
-    //Git.Staging.stageAll ""
-    //Git.Commit.exec "" (sprintf "Bump version to %s" release.NugetVersion)
-    //Git.Branches.pushBranch "" remote (Git.Information.getBranchName "")
-
-    //Git.Branches.tag "" release.NugetVersion
-    //Git.Branches.pushTag "" remote release.NugetVersion
-
-    //// release on github
-    //GitHub.createClient user pw
-    //|> createDraft gitOwner gitName release.NugetVersion (release.SemVer.PreRelease <> None) release.Notes
-    //// TODO: |> uploadFile "PATH_TO_FILE"
-    //|> releaseDraft
-    //|> Async.RunSynchronously
-
-    // using simplified FAKE 5 release for now
-
-    Git.Staging.stageAll ""
-    Git.Commit.exec "" (sprintf "Bump version to %s" release.NugetVersion)
-    Git.Branches.push ""
-
-    Git.Branches.tag "" release.NugetVersion
-    Git.Branches.pushTag "" "origin" release.NugetVersion
-)
-
 Target.create "BuildPackage" ignore
 Target.create "GenerateDocs" ignore
+Target.create "Release" ignore
 
 // --------------------------------------------------------------------------------------
 // Run all targets by default. Invoke 'build -t <Target>' to override
@@ -400,10 +223,7 @@ Target.create "GenerateDocs" ignore
 Target.create "All" ignore
 
 "Clean"
-  ==> "AssemblyInfo"
-  ==> "Restore"
   ==> "Build"
-  ==> "CopyBinaries"
   ==> "RunTests"
   ==> "GenerateDocs"
   ==> "NuGet"
@@ -417,10 +237,6 @@ Target.create "All" ignore
   ==> "GenerateDocs"
 
 "Clean"
-  ==> "Release"
-
-"BuildPackage"
-  ==> "PublishNuget"
   ==> "Release"
 
 Target.runOrDefault "All"

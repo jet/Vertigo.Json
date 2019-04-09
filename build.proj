@@ -21,5 +21,4 @@
   <Target Name="Test">
   </Target>
   <Target Name="VSTest" DependsOnTargets="Test" />
-  <Import Project=".paket\Paket.Restore.targets" />
 </Project>
