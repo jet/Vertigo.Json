@@ -89,13 +89,14 @@ Target.create "CleanDocs" (fun _ ->
 
 // --------------------------------------------------------------------------------------
 // Build library & test project
+let customParams = Some (sprintf "/p:Version=%s" version)
 
 Target.create "Build" (fun _ ->
     solutionFile
     |> DotNet.build (fun p ->
         { p with
             Configuration = buildConfiguration
-            Common = { p.Common with CustomParams = Some (sprintf "/p:Version=%s" version) } })
+            Common = { p.Common with CustomParams = customParams } })
 )
 
 // --------------------------------------------------------------------------------------
@@ -106,6 +107,7 @@ Target.create "RunTests" (fun _ ->
     |> DotNet.test (fun p ->
         { p with
             Configuration = buildConfiguration
+            Common = { p.Common with CustomParams = customParams }
             NoBuild = true })
 )
 
@@ -116,8 +118,9 @@ Target.create "NuGet" (fun _ ->
     solutionFile
     |> DotNet.pack (fun p ->
         { p with
-            OutputPath = Some "bin/nupkg"
+            OutputPath = Some (Path.Combine(__SOURCE_DIRECTORY__, "bin", "nupkg"))
             NoBuild = true
+            Common = { p.Common with CustomParams = customParams }
             Configuration = buildConfiguration })
 )
 
